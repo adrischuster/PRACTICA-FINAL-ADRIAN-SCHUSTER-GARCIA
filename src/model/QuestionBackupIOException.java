@@ -1,5 +1,8 @@
 package model;
 
-public class QuestionBackupIOException {
+public class QuestionBackupIOException extends Exception {
+    public QuestionBackupIOException(String msg) {
+        super(msg);
+    }
 
 }

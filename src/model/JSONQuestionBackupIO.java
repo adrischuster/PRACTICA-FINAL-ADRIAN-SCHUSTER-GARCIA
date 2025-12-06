@@ -1,5 +1,5 @@
 package model;
 
-public class JSONQuestionBackupIO {
+public class JSONQuestionBackupIO implements QuestionBackupIO {
 
 }

@@ -1,5 +1,8 @@
 package model;
 
-public class RepositoryException {
+public class RepositoryException extends Exception {
+    public RepositoryException(String msg) {
+        super(msg);
+    }
 
 }

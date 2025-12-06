@@ -8,6 +8,8 @@ public abstract class BaseView {
 
     // Métodos
     public abstract void init();
+    public abstract void menuCRUD();
+    public abstract void menuListar();
 
     public abstract void showMessage(String msg);
 

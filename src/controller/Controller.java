@@ -18,7 +18,7 @@ public class Controller {
 
     // Métodos
     public void load() {
-        // Lógica de carga, utilizar if else
+        // Lógica de carga para IRepo, utilizar if else
         
         // Mostrar mensaje por view
     }

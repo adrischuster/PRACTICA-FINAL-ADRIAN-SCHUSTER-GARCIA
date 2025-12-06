@@ -1,5 +1,5 @@
 package model;
 
-public class BinaryRepository {
+public class BinaryRepository implements IRepository {
 
 }

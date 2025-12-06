@@ -1,15 +1,18 @@
 package model;
 
+import java.util.ArrayList;
+
 public class Model {
     // Atributos
-    // private (Objeto repositorio que implementa IRepository)
-    // private (Objeto questionBackupIO que implementa QuestionBackupIO)
-    // private ¿ArrayList?(Objeto questionCreator que ¿implementa QuestionCreator?)
-    private Question[] preguntas;
+    private IRepository repository;
+    private QuestionBackupIO backupHandler;
+    private ArrayList<QuestionCreator> questionCreators;
+    private ArrayList<Question> preguntas;
 
-    // Constructor
-    /* public Model(Repositorio concreto) {
-        this.
+    // Constructores
+    public Model(IRepository repository, QuestionBackupIO backupHandler, ArrayList<QuestionCreator> questionCreators) {
+        this.repository = repository;
+        this.backupHandler = backupHandler;
+        this.questionCreators = questionCreators;
     }
-    */
 }

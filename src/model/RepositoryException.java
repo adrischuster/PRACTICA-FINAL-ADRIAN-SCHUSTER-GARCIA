@@ -5,4 +5,5 @@ public class RepositoryException extends Exception {
         super(msg);
     }
 
+    // "Envuelve las posibles excepciones - estudiar"
 }

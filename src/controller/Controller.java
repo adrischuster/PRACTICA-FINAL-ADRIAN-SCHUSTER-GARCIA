@@ -1,7 +1,9 @@
 package controller;
 
 import model.Model;
+import model.Question;
 import view.BaseView;
+import java.util.List;
 
 public class Controller {
     // Atributos
@@ -22,6 +24,16 @@ public class Controller {
         
         // Mostrar mensaje por view
     }
+
+    public List<Question> getQuestions() {
+        return model.getQuestions();
+    }
+
+    public void addQuestion(Question question) throws Exception {
+        model.addQuestion(question);
+    }
+
+    public 
 
     public void init() {
         view.init();

@@ -1,32 +1,28 @@
 package model;
 
-import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
-import java.util.ArrayList;
+import java.util.List;
 
 public class Question {
     // Atributos
-    private UUID id;
-    private String author;
-    private HashSet<String> topics;
+    private final UUID id;
     private String statement;
-    private ArrayList<Option> options;
+    private List<Option> options;
+    private String author;
+    private Set<String> topics;
 
     // Constructor
-    public Question(String author, HashSet<String> topics, String statement, ArrayList<Option> options) {
-        this.id = UUID.randomUUID(); // ¿Genero así?
-        this.author = author;
-        this.topics = topics;
+    public Question(String statement, List<Option> options, String author, Set<String> topics) {
+        this.id = UUID.randomUUID();
         this.statement = statement;
         this.options = options;
+        this.author = author;
+        this.topics = topics;
     }
-
     // Getters y Setters
     public UUID getId() {
         return id;
-    }
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public String getAuthor() {
@@ -36,10 +32,10 @@ public class Question {
         this.author = author;
     }
 
-    public HashSet<String> getTopics() {
+    public Set<String> getTopics() {
         return topics;
     }
-    public void setTopics(HashSet<String> topics) {
+    public void setTopics(Set<String> topics) {
         this.topics = topics;
     }
 
@@ -50,10 +46,10 @@ public class Question {
         this.statement = statement;
     }
 
-    public ArrayList<Option> getOptions() {
+    public List<Option> getOptions() {
         return options;
     }
-    public void setOptions(ArrayList<Option> options) {
+    public void setOptions(List<Option> options) {
         this.options = options;
     }
 }

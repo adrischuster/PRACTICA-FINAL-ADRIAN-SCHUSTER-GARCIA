@@ -7,9 +7,15 @@ public class Option {
     private boolean correct;
 
     // Constructor
-    public Option(String text, boolean isCorrect) {
+    public Option(String text, boolean correct) {
         this.text = text;
-        this.correct = isCorrect;
+        this.rationale = null;
+        this.correct = correct;
+    }
+
+    public Option(String text, String rationale, boolean correct) {
+        this(text, correct);
+        this.rationale = rationale;
     }
 
     // Getters y Setters

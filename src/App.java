@@ -4,19 +4,18 @@ import model.Model;
 import model.QuestionBackupIO;
 import model.IRepository;
 import model.JSONQuestionBackupIO;
+import java.util.List;
 import java.util.ArrayList;
 import model.QuestionCreator;
 import view.BaseView;
 import view.InteractiveView;
-
-// PROBLEMA GORDO CON GITHUB EN APP.JAVA
 
 public class App {
     public static void main(String[] args) throws Exception {
         // Settear
         IRepository repository = new BinaryRepository();
         QuestionBackupIO backupHandler = new JSONQuestionBackupIO();
-        ArrayList<QuestionCreator> questionCreators = new ArrayList<>();
+        List<QuestionCreator> questionCreators = new ArrayList<>();
 
         // Implementar estructura para QuestionCreator
 

@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.List;
 import java.security.PublicKey;
+// Implementar un método más limpio?
 import java.time.LocalDateTime;
 
 public class Question {

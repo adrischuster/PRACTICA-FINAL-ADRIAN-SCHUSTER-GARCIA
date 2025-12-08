@@ -22,20 +22,35 @@ public class InteractiveView extends BaseView {
         System.err.println(msg);
     }
 
+    // private?
+    private int showChoiceMessage(int choiceSize) {
+        int choice = Esdia.readInt("Seleccione una opción: ");
+        while (choice < 0 || choice > choiceSize) {
+            showErrorMessage("Opción no válida.");
+            choice = Esdia.readInt("Seleccione una opción: ");
+        }
+        return choice;
+    }
+
     @Override
     public void init() {
-        // Comentar en informe: 'entry'
+        // Comentar en informe: 'entry'?
         int entry;
         do {
+            System.out.println("\n        --- Menú  ---         ");
             System.out.println("1) Gestionar preguntas (CRUD)");
             System.out.println("2) Exportar/Importar preguntas");
             System.out.println("3) Modo Examen");
             /* Implementar gestión para QuestionCreator
             if () {
                 System.out.println("4) Crear pregunta aleatoria");
-            } */
+                System.out.println("0) Guardar y salir");
+                entry = showChoiceMessage(4);
+            } else {
+            ...    
+            */
             System.out.println("0) Guardar y salir");
-            entry = Esdia.readInt("Seleccione una opción: ", 0, 3);
+            entry = showChoiceMessage(3);
 
             switch (entry) {
                 case 1:
@@ -51,7 +66,7 @@ public class InteractiveView extends BaseView {
                 case 4:
                     // Lógica para modo examen
                     break;
-                case 5:
+                case 0:
                     end();
                     break;
                 default:
@@ -66,19 +81,24 @@ public class InteractiveView extends BaseView {
     private void menuCRUD() {
         int entry;
         do {
+            System.out.println("\n  --- Gestión preguntas ---      ");
             System.out.println("1) Crear pregunta nueva");
             System.out.println("2) Ver preguntas existentes");
             System.out.println("0) Volver");
-            entry = Esdia.readInt("Seleccione una opción: ", 0, 2);
+            entry = showChoiceMessage(2);
 
             switch (entry) {
                 case 1:
                     create();
                     break;
                 case 2:
-                    menuListar();
+                    if (controller.getQuestions().size() == 0) {
+                        showErrorMessage("\nNo hay preguntas disponibles.");
+                    } else {
+                        menuListar();
+                    }
                     break;
-                case 3:
+                case 0:
                     break;
                 default:
                     showErrorMessage("Opción no válida.");
@@ -89,16 +109,18 @@ public class InteractiveView extends BaseView {
 
     private void create() {
         // Lógica de creación por E/S
-        String statement = Esdia.readString("Introduzca el enunciado de la pregunta: ");
+        String statement = Esdia.readString("\nIntroduzca el enunciado de la pregunta: ");
         List<Option> options = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
             Option option;
             String text = Esdia.readString("Introduzca la opción " + (i + 1) + ": ");
+            // 1) Gestionar [SsNn]
+            // 2) Validar que solo hay una opción correcta, y no preguntar siOno cuando ya se sabe cuál es
+            // 3) siOno no reconoce fallos, salta línea
             boolean correct = Esdia.siOno("¿Opción correcta? (s/n): ");
             if (Esdia.siOno("¿Desea introducir un comentario justificativo? (s/n): ")) {
                 String rationale = Esdia.readString("Comentario: ");
                 option = new Option(text, rationale, correct);
-                continue;
             } else {
                 option = new Option(text, correct);
             }
@@ -131,10 +153,11 @@ public class InteractiveView extends BaseView {
     private void menuListar() {
         int entry;
         do {
+            System.out.println("\n   --- Ver preguntas ---     ");
             System.out.println("1) Listar por fecha de creación");
             System.out.println("2) Listar por tema");
             System.out.println("0) Volver");
-            entry = Esdia.readInt("Seleccione una opción: ", 0, 2);
+            entry = showChoiceMessage(2);
 
             switch (entry) {
                 case 1:
@@ -143,7 +166,7 @@ public class InteractiveView extends BaseView {
                 case 2:
                     listByTopic();
                     break;
-                case 3:
+                case 0:
                     break;
                 default:
                     showErrorMessage("Opción no válida.");
@@ -153,6 +176,7 @@ public class InteractiveView extends BaseView {
     }
 
     public void listByDate() {
+        System.out.println("\nPreguntas disponibles (por fecha de creación): ");
         List<Question> questions = controller.getQuestions();
         for (int i = 0; i < questions.size(); i++) {
             Question q = questions.get(i);
@@ -162,8 +186,8 @@ public class InteractiveView extends BaseView {
         // Escribir en el informe el intento de posible separación de estos 2 métodos en otra parte del menú
         
         // Implementar while?
-        if (Esdia.siOno("Desea ver el detalle de una pregunta? (s/n): ")) {
-            int index = Esdia.readInt("Introduzca el número de la pregunta: ", 1, questions.size()) - 1;
+        if (Esdia.siOno("Desea ver el detalle de alguna pregunta? (s/n): ")) {
+            int index = showChoiceMessage(questions.size()) - 1;
             Question questionForDetail = questions.get(index);
             seeDetail(questionForDetail);
         }
@@ -171,8 +195,7 @@ public class InteractiveView extends BaseView {
 
     public void listByTopic() {
         Set<String> allTopics = controller.getAllTopics();
-        // Escribir en el informe el descuido al leer esta parte (igual era innecesario un listado de temas, o igual no)
-        System.out.println("Listado de temas disponibles: ");
+        System.out.println("\nTemas disponibles: ");
         for (String topic : allTopics) {
             System.out.println("-> " + topic);
         }
@@ -181,6 +204,7 @@ public class InteractiveView extends BaseView {
         do {
             selectedTopic = Esdia.readString("Introduzca el tema por el que desea filtrar: ").toUpperCase();
             if (allTopics.contains(selectedTopic)) {
+                System.out.println("\nPreguntas disponibles (" + selectedTopic + "):");
                 List<Question> questions = controller.getQuestions();
                 List<Question> filteredQuestions = new ArrayList<>();
                 for (Question q : questions) {
@@ -193,7 +217,7 @@ public class InteractiveView extends BaseView {
                     System.out.println((i + 1) + ") " + qfil.getStatement());
                 }
                 if (Esdia.siOno("Desea ver el detalle de una pregunta? (s/n): ")) {
-                    int index = Esdia.readInt("Introduzca el número de la pregunta: ", 1, filteredQuestions.size()) - 1;
+                    int index = showChoiceMessage(filteredQuestions.size()) - 1;
                     Question questionForDetail = filteredQuestions.get(index);
                     seeDetail(questionForDetail);
                 }
@@ -204,7 +228,7 @@ public class InteractiveView extends BaseView {
     }
     
     public void seeDetail(Question q) {
-        System.out.println("->" + q.getStatement());
+        System.out.println("\n-> " + q.getStatement());
         List<Option> options = q.getOptions();
         for (int i = 0; i < options.size(); i++) {
             Option o = options.get(i);
@@ -219,10 +243,10 @@ public class InteractiveView extends BaseView {
         // Menú para modificar o eliminar
         int entry;
         do {
-            System.out.println("1) Modificar pregunta");
+            System.out.println("\n1) Modificar pregunta");
             System.out.println("2) Eliminar pregunta");
             System.out.println("0) Volver");
-            entry = Esdia.readInt("Seleccione una opción: ", 0, 2);
+            entry = showChoiceMessage(2);
 
             switch (entry) {
                 case 1:
@@ -231,7 +255,7 @@ public class InteractiveView extends BaseView {
                 case 2:
                     remove(q);
                     break;
-                case 3:
+                case 0:
                     break;
                 default:
                     showErrorMessage("Opción no válida.");
@@ -243,17 +267,17 @@ public class InteractiveView extends BaseView {
     public void modify(Question q) {
         int entry;
         do {
-            System.out.println("Modificar:");
+            System.out.println("\nModificar:");
             System.out.println("1) Enunciado");
             System.out.println("2) Opciones");
             System.out.println("3) Autor");
             System.out.println("4) Temas");
             System.out.println("0) Volver");
-            entry = Esdia.readInt("Seleccione una opción: ", 0, 4);
+            entry = showChoiceMessage(4);
 
             switch (entry) {
                 case 1:
-                    String newStatement = Esdia.readString("Nuevo enunciado: ");
+                    String newStatement = Esdia.readString("|\nNuevo enunciado: ");
                     try {
                         controller.updateStatement(q, newStatement);
                         showMessage("Enunciado modificado correctamente.");
@@ -264,22 +288,17 @@ public class InteractiveView extends BaseView {
                 case 2:
                     int optionNumber;
                     do {
-                        System.out.println("Modificar:");
+                        System.out.println("\nModificar opciones:");
                         System.out.println("1) Opción 1");
                         System.out.println("2) Opción 2");
                         System.out.println("3) Opción 3");
                         System.out.println("4) Opción 4");
                         System.out.println("0) Volver");
-                        optionNumber = Esdia.readInt("Seleccione una opción: ", 0, 4);
-
-                        if (optionNumber < 0 || optionNumber > 4) {
-                            showErrorMessage("Opción no válida.");
-                            
-                        }
+                        optionNumber = showChoiceMessage(4);
                     } while (optionNumber!=0);
 
                     Option newOption;
-                    String newText = Esdia.readString("Nueva opción: ");
+                    String newText = Esdia.readString("\nNueva opción: ");
                     boolean correct = Esdia.siOno("¿Es correcta? (s/n): ");
                     if (Esdia.siOno("¿Desea introducir un comentario justificativo? (s/n): ")) {
                         String rationale = Esdia.readString("Comentario: ");
@@ -298,7 +317,7 @@ public class InteractiveView extends BaseView {
                     break;
                 case 3:
                     try {
-                        String newAuthor = Esdia.readString("Nuevo autor: ");
+                        String newAuthor = Esdia.readString("\nNuevo autor: ");
                         controller.updateAuthor(q, newAuthor);
                         showMessage("Autor modificado correctamente.");
                     } catch (Exception e) {
@@ -307,8 +326,8 @@ public class InteractiveView extends BaseView {
                     break;
                 case 4:
                     for (String topic : q.getTopics()) {
-                        if (Esdia.siOno("¿Modificar tema '" + topic +"'? (s/n): ")) {
-                            String newTopic = Esdia.readString("Introduzca el nuevo tema: ").toUpperCase();
+                        if (Esdia.siOno("\n-> ¿Modificar tema '" + topic +"'? (s/n): ")) {
+                            String newTopic = Esdia.readString("\nIntroduzca el nuevo tema: ").toUpperCase();
                             try {
                                 controller.updateTopic(q, topic, newTopic);
                                 controller.updateAllTopics(topic, newTopic);
@@ -318,7 +337,7 @@ public class InteractiveView extends BaseView {
                         }
                         break;
                     }
-                case 5:
+                case 0:
                     return;
                 default:
                     showErrorMessage("Opción no válida.");
@@ -342,6 +361,7 @@ public class InteractiveView extends BaseView {
     @Override
     public void end() {
         // Lógica de guardado
+        // añadir \n
 
         showMessage("Aplicación finalizada.");
     }

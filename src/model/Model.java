@@ -23,7 +23,7 @@ public class Model {
     // Métodos
     public void load() {
         // Lógica de carga
-        // Aquí setteo las preguntas, y las cojo siempre del Model con preguntas (atributo de la misma clase)
+        // Aquí setteo las preguntas, y las cojo siempre del Model con questions (atributo de la misma clase)
     }
 
     public void addQuestion(Question question) throws Exception {

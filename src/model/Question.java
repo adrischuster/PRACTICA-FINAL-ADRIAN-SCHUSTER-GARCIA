@@ -3,6 +3,8 @@ package model;
 import java.util.Set;
 import java.util.UUID;
 import java.util.List;
+import java.security.PublicKey;
+import java.time.LocalDateTime;
 
 public class Question {
     // Atributos
@@ -11,6 +13,7 @@ public class Question {
     private List<Option> options;
     private String author;
     private Set<String> topics;
+    private final LocalDateTime creationDate;
 
     // Constructor
     public Question(String statement, List<Option> options, String author, Set<String> topics) {
@@ -19,6 +22,7 @@ public class Question {
         this.options = options;
         this.author = author;
         this.topics = topics;
+        this.creationDate = LocalDateTime.now();
     }
     // Getters y Setters
     public UUID getId() {
@@ -51,5 +55,9 @@ public class Question {
     }
     public void setOptions(List<Option> options) {
         this.options = options;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
     }
 }

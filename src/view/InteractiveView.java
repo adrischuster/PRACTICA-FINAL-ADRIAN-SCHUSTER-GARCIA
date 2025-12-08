@@ -2,13 +2,11 @@ package view;
 
 import com.coti.tools.Esdia;
 import model.Question;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import model.Option;
+import java.util.Set;
 import java.util.HashSet;
-import java.util.UUID;
 
 public class InteractiveView extends BaseView {
     //Atributos
@@ -107,7 +105,7 @@ public class InteractiveView extends BaseView {
             options.add(option);
         }
         String author = Esdia.readString("Introduzca el autor de la pregunta: ");
-        HashSet<String> topics = new HashSet<>();
+        Set<String> topics = new HashSet<>();
         topics.add(Esdia.readString("Introduzca un tema asociado a la pregunta: ").toUpperCase());
         do {
             if (Esdia.siOno("¿Añadir otro tema? (s/n): ")) {
@@ -121,6 +119,7 @@ public class InteractiveView extends BaseView {
         Question newQuestionDTO = new Question(statement, options, author, topics);
         try {
             controller.addQuestion(newQuestionDTO);
+            controller.addAllTopics(topics);
             showMessage("Pregunta añadida correctamente.");            
         } catch (Exception e) {
             // Excepción correcta?
@@ -156,7 +155,8 @@ public class InteractiveView extends BaseView {
     public void listByDate() {
         List<Question> questions = controller.getQuestions();
         for (int i = 0; i < questions.size(); i++) {
-            System.out.println((i + 1) + ") " + questions.get(i).getStatement());
+            Question q = questions.get(i);
+            System.out.println((i + 1) + ") " + q.getStatement() + " (" + q.getCreationDate() + ")");
         }
 
         // Escribir en el informe el intento de posible separación de estos 2 métodos en otra parte del menú
@@ -170,7 +170,37 @@ public class InteractiveView extends BaseView {
     }
 
     public void listByTopic() {
-        // Lógica para listar preguntas por tema
+        Set<String> allTopics = controller.getAllTopics();
+        // Escribir en el informe el descuido al leer esta parte (igual era innecesario un listado de temas, o igual no)
+        System.out.println("Listado de temas disponibles: ");
+        for (String topic : allTopics) {
+            System.out.println("-> " + topic);
+        }
+        
+        String selectedTopic;
+        do {
+            selectedTopic = Esdia.readString("Introduzca el tema por el que desea filtrar: ").toUpperCase();
+            if (allTopics.contains(selectedTopic)) {
+                List<Question> questions = controller.getQuestions();
+                List<Question> filteredQuestions = new ArrayList<>();
+                for (Question q : questions) {
+                    if (q.getTopics().contains(selectedTopic)) {
+                        filteredQuestions.add(q);
+                    }
+                }
+                for (int i = 0; i < filteredQuestions.size(); i++) {
+                    Question qfil = filteredQuestions.get(i);
+                    System.out.println((i + 1) + ") " + qfil.getStatement());
+                }
+                if (Esdia.siOno("Desea ver el detalle de una pregunta? (s/n): ")) {
+                    int index = Esdia.readInt("Introduzca el número de la pregunta: ", 1, filteredQuestions.size()) - 1;
+                    Question questionForDetail = filteredQuestions.get(index);
+                    seeDetail(questionForDetail);
+                }
+            } else {
+                showErrorMessage("El tema introducido no existe.");
+            }
+        } while (!allTopics.contains(selectedTopic));
     }
     
     public void seeDetail(Question q) {
@@ -229,9 +259,8 @@ public class InteractiveView extends BaseView {
                         showMessage("Enunciado modificado correctamente.");
                     } catch (Exception e) {
                         showErrorMessage("Error al modificar la pregunta: " + e.getMessage());
-                    } finally {
-                        break;
-                    }
+                    } 
+                    break;
                 case 2:
                     int optionNumber;
                     do {
@@ -265,9 +294,8 @@ public class InteractiveView extends BaseView {
                         showMessage("Enunciado modificado correctamente.");
                     } catch (Exception e) {
                         showErrorMessage("Error al modificar la opción: " + e.getMessage());
-                    } finally {
-                        break;
                     }
+                    break;
                 case 3:
                     try {
                         String newAuthor = Esdia.readString("Nuevo autor: ");
@@ -275,22 +303,20 @@ public class InteractiveView extends BaseView {
                         showMessage("Autor modificado correctamente.");
                     } catch (Exception e) {
                         showErrorMessage("Error al modificar el autor: " + e.getMessage());
-                    } finally {
-                        break;
                     }
-                    
+                    break;
                 case 4:
                     for (String topic : q.getTopics()) {
                         if (Esdia.siOno("¿Modificar tema '" + topic +"'? (s/n): ")) {
                             String newTopic = Esdia.readString("Introduzca el nuevo tema: ").toUpperCase();
                             try {
                                 controller.updateTopic(q, topic, newTopic);
+                                controller.updateAllTopics(topic, newTopic);
                             } catch (Exception e) {
                                 showErrorMessage("Error al modificar el tema: " + e.getMessage());
-                            } finally {
-                                break;
                             }
                         }
+                        break;
                     }
                 case 5:
                     return;
@@ -299,6 +325,18 @@ public class InteractiveView extends BaseView {
                     break;
             }
         } while (entry!=0);
+    }
+
+    public void remove(Question q) {
+        if (Esdia.siOno("¿Está seguro de que desea eliminar esta pregunta? (s/n): ")) {
+            try {
+                controller.remove(q);
+                controller.removeAllTopics(q.getTopics());
+                showMessage("Pregunta eliminada correctamente.");
+            } catch (Exception e) {
+                showErrorMessage("Error al eliminar la pregunta: " + e.getMessage());
+            }
+        }
     }
 
     @Override

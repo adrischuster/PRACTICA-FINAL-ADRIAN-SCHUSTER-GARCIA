@@ -22,6 +22,8 @@ public class InteractiveView extends BaseView {
         System.err.println(msg);
     }
 
+    // Escribir en el informe: motivo-> limpieza por pantalla
+
     // private?
     private int showChoiceMessage(int choiceSize) {
         int choice = Esdia.readInt("Seleccione una opción: ");
@@ -30,6 +32,17 @@ public class InteractiveView extends BaseView {
             choice = Esdia.readInt("Seleccione una opción: ");
         }
         return choice;
+    }
+
+    private boolean showYesOrNo(String msg) {
+        System.out.print(msg + " (s/n): ");
+        char response = Character.toUpperCase(Esdia.readString("").charAt(0));
+        while (response != 'S' && response != 'N') {
+            showErrorMessage("Opción no válida. Introduzca 's' o 'n'.");
+            System.out.print(msg + " (s/n): ");
+            response = Character.toUpperCase(Esdia.readString("").charAt(0));
+        }
+        return response == 'S';
     }
 
     @Override
@@ -111,14 +124,18 @@ public class InteractiveView extends BaseView {
         // Lógica de creación por E/S
         String statement = Esdia.readString("\nIntroduzca el enunciado de la pregunta: ");
         List<Option> options = new ArrayList<>();
+        boolean hasCorrectOption = false;
         for (int i = 0; i < 4; i++) {
             Option option;
             String text = Esdia.readString("Introduzca la opción " + (i + 1) + ": ");
-            // 1) Gestionar [SsNn]
-            // 2) Validar que solo hay una opción correcta, y no preguntar siOno cuando ya se sabe cuál es
-            // 3) siOno no reconoce fallos, salta línea
-            boolean correct = Esdia.siOno("¿Opción correcta? (s/n): ");
-            if (Esdia.siOno("¿Desea introducir un comentario justificativo? (s/n): ")) {
+            boolean correct = false;
+            if (!hasCorrectOption) {
+                correct = showYesOrNo("¿Opción correcta?");
+                if (correct) {
+                    hasCorrectOption = true;
+                }
+            }
+            if (showYesOrNo("¿Desea introducir un comentario justificativo?")) {
                 String rationale = Esdia.readString("Comentario: ");
                 option = new Option(text, rationale, correct);
             } else {
@@ -130,7 +147,7 @@ public class InteractiveView extends BaseView {
         Set<String> topics = new HashSet<>();
         topics.add(Esdia.readString("Introduzca un tema asociado a la pregunta: ").toUpperCase());
         do {
-            if (Esdia.siOno("¿Añadir otro tema? (s/n): ")) {
+            if (showYesOrNo("¿Añadir otro tema?")) {
                 topics.add(Esdia.readString("Introduzca otro tema: ").toUpperCase());
             } else {
                 break;
@@ -186,7 +203,7 @@ public class InteractiveView extends BaseView {
         // Escribir en el informe el intento de posible separación de estos 2 métodos en otra parte del menú
         
         // Implementar while?
-        if (Esdia.siOno("Desea ver el detalle de alguna pregunta? (s/n): ")) {
+        if (showYesOrNo("¿Desea ver el detalle de alguna pregunta?")) {
             int index = showChoiceMessage(questions.size()) - 1;
             Question questionForDetail = questions.get(index);
             seeDetail(questionForDetail);
@@ -203,28 +220,28 @@ public class InteractiveView extends BaseView {
         String selectedTopic;
         do {
             selectedTopic = Esdia.readString("Introduzca el tema por el que desea filtrar: ").toUpperCase();
-            if (allTopics.contains(selectedTopic)) {
-                System.out.println("\nPreguntas disponibles (" + selectedTopic + "):");
-                List<Question> questions = controller.getQuestions();
-                List<Question> filteredQuestions = new ArrayList<>();
-                for (Question q : questions) {
-                    if (q.getTopics().contains(selectedTopic)) {
-                        filteredQuestions.add(q);
-                    }
-                }
-                for (int i = 0; i < filteredQuestions.size(); i++) {
-                    Question qfil = filteredQuestions.get(i);
-                    System.out.println((i + 1) + ") " + qfil.getStatement());
-                }
-                if (Esdia.siOno("Desea ver el detalle de una pregunta? (s/n): ")) {
-                    int index = showChoiceMessage(filteredQuestions.size()) - 1;
-                    Question questionForDetail = filteredQuestions.get(index);
-                    seeDetail(questionForDetail);
-                }
-            } else {
-                showErrorMessage("El tema introducido no existe.");
+            if (!allTopics.contains(selectedTopic)) {
+            showErrorMessage("El tema introducido no existe.");
             }
         } while (!allTopics.contains(selectedTopic));
+        
+        System.out.println("\nPreguntas disponibles (" + selectedTopic + "):");
+        List<Question> questions = controller.getQuestions();
+        List<Question> filteredQuestions = new ArrayList<>();
+        for (Question q : questions) {
+            if (q.getTopics().contains(selectedTopic)) {
+                filteredQuestions.add(q);
+            }
+        }
+        for (int i = 0; i < filteredQuestions.size(); i++) {
+            Question qfil = filteredQuestions.get(i);
+            System.out.println((i + 1) + ") " + qfil.getStatement());
+        }
+        if (showYesOrNo("¿Desea ver el detalle de alguna pregunta?")) {
+            int index = showChoiceMessage(filteredQuestions.size()) - 1;
+            Question questionForDetail = filteredQuestions.get(index);
+            seeDetail(questionForDetail);
+        }
     }
     
     public void seeDetail(Question q) {
@@ -232,12 +249,12 @@ public class InteractiveView extends BaseView {
         List<Option> options = q.getOptions();
         for (int i = 0; i < options.size(); i++) {
             Option o = options.get(i);
-            System.out.println((i + 1) + ") " + o.getText() + (o.isCorrect() ? " (Correcta)" : ""));
+            System.out.println("\n" + (i + 1) + ") " + o.getText() + (o.isCorrect() ? " (CORRECTA)" : ""));
             if (o.getRationale() != null) {
                 System.out.println("(" + o.getRationale() + ")");
             }
         }
-        System.out.println("Autor: " + q.getAuthor());
+        System.out.println("\nAutor: " + q.getAuthor());
         System.out.println("Temas: " + String.join(", ", q.getTopics()));
 
         // Menú para modificar o eliminar
@@ -277,30 +294,37 @@ public class InteractiveView extends BaseView {
 
             switch (entry) {
                 case 1:
-                    String newStatement = Esdia.readString("|\nNuevo enunciado: ");
+                    String newStatement = Esdia.readString("\nNuevo enunciado: ");
                     try {
                         controller.updateStatement(q, newStatement);
-                        showMessage("Enunciado modificado correctamente.");
+                        showMessage("\nEnunciado modificado correctamente.");
                     } catch (Exception e) {
-                        showErrorMessage("Error al modificar la pregunta: " + e.getMessage());
+                        showErrorMessage("\nError al modificar la pregunta: " + e.getMessage());
                     } 
                     break;
                 case 2:
-                    int optionNumber;
-                    do {
-                        System.out.println("\nModificar opciones:");
-                        System.out.println("1) Opción 1");
-                        System.out.println("2) Opción 2");
-                        System.out.println("3) Opción 3");
-                        System.out.println("4) Opción 4");
-                        System.out.println("0) Volver");
-                        optionNumber = showChoiceMessage(4);
-                    } while (optionNumber!=0);
+                    System.out.println("\nModificar opciones:");
+                    System.out.println("1) Opción 1");
+                    System.out.println("2) Opción 2");
+                    System.out.println("3) Opción 3");
+                    System.out.println("4) Opción 4");
+                    System.out.println("0) Volver");
+                    int optionNumber = showChoiceMessage(4);
+                    
+                    if (optionNumber == 0) {
+                        break;
+                    }
 
                     Option newOption;
                     String newText = Esdia.readString("\nNueva opción: ");
-                    boolean correct = Esdia.siOno("¿Es correcta? (s/n): ");
-                    if (Esdia.siOno("¿Desea introducir un comentario justificativo? (s/n): ")) {
+
+                    boolean wasCorrect = q.getOptions().get(optionNumber - 1).isCorrect();
+                    boolean correct = showYesOrNo("¿Es la correcta?");
+                    if (correct != wasCorrect) {
+                        // Asegurarse de que hay una única correcta
+                    }
+
+                    if (showYesOrNo("¿Desea introducir un comentario justificativo?")) {
                         String rationale = Esdia.readString("Comentario: ");
                         newOption = new Option(newText, rationale, correct);
                         continue;
@@ -310,33 +334,34 @@ public class InteractiveView extends BaseView {
 
                     try {
                         controller.updateOption(q, optionNumber, newOption);
-                        showMessage("Enunciado modificado correctamente.");
+                        showMessage("\nOpción modificada correctamente.");
                     } catch (Exception e) {
-                        showErrorMessage("Error al modificar la opción: " + e.getMessage());
+                        showErrorMessage("\nError al modificar la opción: " + e.getMessage());
                     }
                     break;
                 case 3:
                     try {
                         String newAuthor = Esdia.readString("\nNuevo autor: ");
                         controller.updateAuthor(q, newAuthor);
-                        showMessage("Autor modificado correctamente.");
+                        showMessage("\nAutor modificado correctamente.");
                     } catch (Exception e) {
-                        showErrorMessage("Error al modificar el autor: " + e.getMessage());
+                        showErrorMessage("\nError al modificar el autor: " + e.getMessage());
                     }
                     break;
                 case 4:
                     for (String topic : q.getTopics()) {
-                        if (Esdia.siOno("\n-> ¿Modificar tema '" + topic +"'? (s/n): ")) {
+                        if (showYesOrNo("\n-> ¿Modificar tema '" + topic +"'?")) {
                             String newTopic = Esdia.readString("\nIntroduzca el nuevo tema: ").toUpperCase();
                             try {
                                 controller.updateTopic(q, topic, newTopic);
                                 controller.updateAllTopics(topic, newTopic);
+                                showMessage("\nTema modificado correctamente.");
                             } catch (Exception e) {
-                                showErrorMessage("Error al modificar el tema: " + e.getMessage());
+                                showErrorMessage("\nError al modificar el tema: " + e.getMessage());
                             }
                         }
-                        break;
                     }
+                    break;
                 case 0:
                     return;
                 default:
@@ -347,13 +372,13 @@ public class InteractiveView extends BaseView {
     }
 
     public void remove(Question q) {
-        if (Esdia.siOno("¿Está seguro de que desea eliminar esta pregunta? (s/n): ")) {
+        if (showYesOrNo("¿Está seguro de que desea eliminar esta pregunta?")) {
             try {
                 controller.remove(q);
                 controller.removeAllTopics(q.getTopics());
-                showMessage("Pregunta eliminada correctamente.");
+                showMessage("\nPregunta eliminada correctamente.");
             } catch (Exception e) {
-                showErrorMessage("Error al eliminar la pregunta: " + e.getMessage());
+                showErrorMessage("\nError al eliminar la pregunta: " + e.getMessage());
             }
         }
     }
@@ -363,7 +388,7 @@ public class InteractiveView extends BaseView {
         // Lógica de guardado
         // añadir \n
 
-        showMessage("Aplicación finalizada.");
+        showMessage("\nAplicación finalizada.");
     }
 
 }

@@ -3,7 +3,7 @@ package model;
 import java.util.Set;
 import java.util.UUID;
 import java.util.List;
-// Implementar un método más limpio?
+// mejor con epoch? mirar foro
 import java.time.ZonedDateTime;
 import java.io.Serializable;
 

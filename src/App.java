@@ -25,7 +25,7 @@ public class App {
         Controller controller = new Controller(model, view);
 
         // Iniciar app
-        controller.load();
+        controller.loadQuestions();
 
         controller.init();
     }

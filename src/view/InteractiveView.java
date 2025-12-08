@@ -70,7 +70,7 @@ public class InteractiveView extends BaseView {
                     menuCRUD();
                     break;
                 case 2:
-                    // Lógica para exportar/importar preguntas
+                    menuBackup();
                     break;
                 case 3:
                     // Lógica para crear pregunta aleatoria
@@ -391,9 +391,34 @@ public class InteractiveView extends BaseView {
         return false;
     }
 
+    public void menuBackup() {
+        int entry;
+        do {
+            System.out.println("\n --- Exportar/Importar preguntas ---     ");
+            System.out.println("1) Exportar preguntas");
+            System.out.println("2) Importar preguntas");
+            System.out.println("0) Volver");
+            entry = showChoiceMessage(2);
+
+            switch (entry) {
+                case 1:
+                    controller.exportQuestions();
+                    break;
+                case 2:
+                    // Lógica para importar preguntas
+                    break;
+                case 0:
+                    break;
+                default:
+                    showErrorMessage("Opción no válida.");
+                    break;
+            }
+        } while (entry!=0);
+    }
+
     @Override
     public void end() {
-        controller.save();
+        controller.saveQuestions();
         showMessage("Aplicación finalizada.");
     }
 

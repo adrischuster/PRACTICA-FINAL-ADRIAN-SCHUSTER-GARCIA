@@ -12,7 +12,7 @@ public class BinaryRepository implements IRepository {
     private final Path filePath = Paths.get(System.getProperty("user.home"), "questions.bin");
 
     @Override
-    public void save(List<Question> questions) {
+    public void saveQuestions(List<Question> questions) {
         try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(filePath))) {
             oos.writeObject(questions);
             System.out.println("\nGuardado exitoso.");
@@ -24,7 +24,7 @@ public class BinaryRepository implements IRepository {
     // Eliminar supress tras control de excepciones
     @SuppressWarnings("unchecked")
     @Override
-    public List<Question> load() {
+    public List<Question> loadQuestions() {
         if (Files.exists(filePath)) {
             try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(filePath))) {
                 return (ArrayList<Question>) ois.readObject();

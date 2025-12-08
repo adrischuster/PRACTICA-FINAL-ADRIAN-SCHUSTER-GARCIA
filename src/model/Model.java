@@ -22,8 +22,8 @@ public class Model {
     }
 
     // Métodos
-    public boolean load() {
-        List<Question> loadedQuestions = repository.load();
+    public boolean loadQuestions() {
+        List<Question> loadedQuestions = repository.loadQuestions();
         
         setQuestions(loadedQuestions);
         Set<String> loadedAllTopics = new HashSet<>();
@@ -37,6 +37,10 @@ public class Model {
             previousSave = false;
         }
         return previousSave;
+    }
+
+    public void exportQuestions() {
+        backupHandler.exportQuestions(questions);
     }
 
     public void addQuestion(Question question) throws Exception {
@@ -102,8 +106,8 @@ public class Model {
         questions.remove(question);
     }
 
-    public void save() {
-        repository.save(questions);
+    public void saveQuestions() {
+        repository.saveQuestions(questions);
     }
 
     // Getters y setters

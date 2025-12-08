@@ -21,13 +21,17 @@ public class Controller {
     }
 
     // Métodos
-    public void load() {
-        boolean previousSave = model.load();
+    public void loadQuestions() {
+        boolean previousSave = model.loadQuestions();
         if (previousSave) {
-            view.showMessage("Guardado previo cargado correctamente.");
+            view.showMessage("\nGuardado previo cargado correctamente.");
         } else {
-            view.showMessage("No se han encontrado datos previos.");
+            view.showMessage("\nNo se han encontrado datos previos.");
         }
+    }
+
+    public void exportQuestions() {
+        model.exportQuestions();
     }
 
     public void init() {
@@ -74,7 +78,7 @@ public class Controller {
         model.remove(question);
     }
 
-    public void save() {
-        model.save();
+    public void saveQuestions() {
+        model.saveQuestions();
     }
 }

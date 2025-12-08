@@ -402,10 +402,10 @@ public class InteractiveView extends BaseView {
 
             switch (entry) {
                 case 1:
-                    controller.exportQuestions();
+                    exportQuestions();
                     break;
                 case 2:
-                    // Lógica para importar preguntas
+                    importQuestions();
                     break;
                 case 0:
                     break;
@@ -414,6 +414,26 @@ public class InteractiveView extends BaseView {
                     break;
             }
         } while (entry!=0);
+    }
+
+    public void exportQuestions() {
+        try {
+            String fileName = Esdia.readString("\nIntroduce el nombre del archivo en el 'home' de tu usuario (con extensión), donde se exportarán las preguntas: \n");
+            controller.exportQuestions(fileName);
+            showMessage("\nPreguntas exportadas correctamente.");
+        } catch (Exception e) {
+            showErrorMessage("\nError al exportar las preguntas: " + e.getMessage());
+        }
+    }
+
+    public void importQuestions() {
+        try {
+            String fileName = Esdia.readString("\nIntroduce el nombre del archivo en el 'home' de tu usuario (con extensión), desde donde se importarán las preguntas: \n");
+            controller.importQuestions(fileName);
+            showMessage("\nPreguntas importadas correctamente.");
+        } catch (Exception e) {
+            showErrorMessage("\nError al importar las preguntas: " + e.getMessage());
+        }
     }
 
     @Override

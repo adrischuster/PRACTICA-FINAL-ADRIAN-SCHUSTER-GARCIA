@@ -30,8 +30,12 @@ public class Controller {
         }
     }
 
-    public void exportQuestions() {
-        model.exportQuestions();
+    public void exportQuestions(String fileName) throws Exception {
+        model.exportQuestions(fileName);
+    }
+
+    public void importQuestions(String fileName) throws Exception {
+        model.importQuestions(fileName);
     }
 
     public void init() {

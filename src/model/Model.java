@@ -26,11 +26,9 @@ public class Model {
         List<Question> loadedQuestions = repository.loadQuestions();
         
         setQuestions(loadedQuestions);
-        Set<String> loadedAllTopics = new HashSet<>();
         for (Question question : loadedQuestions) {
-            loadedAllTopics.addAll(question.getTopics());
+            allTopics.addAll(question.getTopics());
         }
-        setAllTopics(loadedAllTopics);
 
         boolean previousSave = true;
         if (loadedQuestions.isEmpty()) {
@@ -39,11 +37,28 @@ public class Model {
         return previousSave;
     }
 
-    public void exportQuestions() {
-        backupHandler.exportQuestions(questions);
+    public void exportQuestions(String fileName) throws Exception {
+        backupHandler.exportQuestions(fileName, questions);
     }
 
-    public void addQuestion(Question question) throws Exception {
+    public void importQuestions (String fileName) throws Exception {
+        // Añadir comentario en el informe sobre los streams
+        List<Question> importedQuestions = backupHandler.importQuestions(fileName);
+        for (Question impq : importedQuestions) {
+            boolean copy = false;
+            for (Question question : questions) {
+                if (question.getId() == impq.getId()) {
+                    copy = true;
+                    break;
+                }
+            }
+            if (!copy) {
+                addQuestion(impq);
+            }
+        }
+    }
+
+    public void addQuestion(Question question) {
         questions.add(question);
         allTopics.addAll(question.getTopics());
     }

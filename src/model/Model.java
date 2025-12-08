@@ -10,6 +10,7 @@ public class Model {
     private IRepository repository;
     private QuestionBackupIO backupHandler;
     private List<QuestionCreator> questionCreators;
+    // Comentar en informe esta decisión
     private List<Question> questions = new ArrayList<>();
     private Set<String> allTopics = new HashSet<>();
 
@@ -21,17 +22,26 @@ public class Model {
     }
 
     // Métodos
-    public void load() {
-        // Lógica de carga
-        // Aquí setteo las preguntas, y las cojo siempre del Model con questions (atributo de la misma clase)
+    public boolean load() {
+        List<Question> loadedQuestions = repository.load();
+        
+        setQuestions(loadedQuestions);
+        Set<String> loadedAllTopics = new HashSet<>();
+        for (Question question : loadedQuestions) {
+            loadedAllTopics.addAll(question.getTopics());
+        }
+        setAllTopics(loadedAllTopics);
+
+        boolean previousSave = true;
+        if (loadedQuestions.isEmpty()) {
+            previousSave = false;
+        }
+        return previousSave;
     }
 
     public void addQuestion(Question question) throws Exception {
         questions.add(question);
-    }
-
-    public void addAllTopics(Set<String> topics) {
-        allTopics.addAll(topics);
+        allTopics.addAll(question.getTopics());
     }
 
     public void removeAllTopics(Set<String> topics) {
@@ -90,6 +100,10 @@ public class Model {
 
     public void remove(Question question) throws Exception {
         questions.remove(question);
+    }
+
+    public void save() {
+        repository.save(questions);
     }
 
     // Getters y setters

@@ -22,9 +22,12 @@ public class Controller {
 
     // Métodos
     public void load() {
-        // Lógica de carga para IRepo, utilizar if else
-        
-        // Mostrar mensaje por view
+        boolean previousSave = model.load();
+        if (previousSave) {
+            view.showMessage("Guardado previo cargado correctamente.");
+        } else {
+            view.showMessage("No se han encontrado datos previos.");
+        }
     }
 
     public void init() {
@@ -41,10 +44,6 @@ public class Controller {
 
     public void addQuestion(Question question) throws Exception {
         model.addQuestion(question);
-    }
-
-    public void addAllTopics(Set<String> topics) {
-        model.addAllTopics(topics);
     }
 
     public void removeAllTopics(Set<String> topics) {
@@ -73,5 +72,9 @@ public class Controller {
 
     public void remove(Question question) throws Exception {
         model.remove(question);
+    }
+
+    public void save() {
+        model.save();
     }
 }

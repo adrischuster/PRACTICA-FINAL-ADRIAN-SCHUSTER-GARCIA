@@ -3,18 +3,19 @@ package model;
 import java.util.Set;
 import java.util.UUID;
 import java.util.List;
-import java.security.PublicKey;
 // Implementar un método más limpio?
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.io.Serializable;
 
-public class Question {
+public class Question implements Serializable {
     // Atributos
+    private static final long serialVersionUID = 1L;
     private final UUID id;
     private String statement;
     private List<Option> options;
     private String author;
     private Set<String> topics;
-    private final LocalDateTime creationDate;
+    private final ZonedDateTime creationDate;
 
     // Constructor
     public Question(String statement, List<Option> options, String author, Set<String> topics) {
@@ -23,7 +24,7 @@ public class Question {
         this.options = options;
         this.author = author;
         this.topics = topics;
-        this.creationDate = LocalDateTime.now();
+        this.creationDate = ZonedDateTime.now();
     }
     // Getters y Setters
     public UUID getId() {
@@ -58,7 +59,7 @@ public class Question {
         this.options = options;
     }
 
-    public LocalDateTime getCreationDate() {
+    public ZonedDateTime getCreationDate() {
         return creationDate;
     }
 }

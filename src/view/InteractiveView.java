@@ -133,6 +133,9 @@ public class InteractiveView extends BaseView {
                 correct = showYesOrNo("¿Opción correcta?");
                 if (correct) {
                     hasCorrectOption = true;
+                } else if (i == 3) {
+                    showErrorMessage("Error: Opción marcada como correcta");
+                    correct = true;
                 }
             }
             if (showYesOrNo("¿Desea introducir un comentario justificativo?")) {
@@ -146,19 +149,14 @@ public class InteractiveView extends BaseView {
         String author = Esdia.readString("Introduzca el autor de la pregunta: ");
         Set<String> topics = new HashSet<>();
         topics.add(Esdia.readString("Introduzca un tema asociado a la pregunta: ").toUpperCase());
-        do {
-            if (showYesOrNo("¿Añadir otro tema?")) {
-                topics.add(Esdia.readString("Introduzca otro tema: ").toUpperCase());
-            } else {
-                break;
-            }
-        } while (true);
+        while (showYesOrNo("¿Añadir otro tema?")) {
+            topics.add(Esdia.readString("Introduzca otro tema: ").toUpperCase());
+        }
 
         // Paso del DTO al modelo
         Question newQuestionDTO = new Question(statement, options, author, topics);
         try {
             controller.addQuestion(newQuestionDTO);
-            controller.addAllTopics(topics);
             showMessage("Pregunta añadida correctamente.");            
         } catch (Exception e) {
             // Excepción correcta?
@@ -179,9 +177,15 @@ public class InteractiveView extends BaseView {
             switch (entry) {
                 case 1:
                     listByDate();
+                    if (controller.getQuestions().size() == 0) {
+                        return;
+                    }
                     break;
                 case 2:
                     listByTopic();
+                    if (controller.getQuestions().size() == 0) {
+                        return;
+                    }
                     break;
                 case 0:
                     break;
@@ -224,7 +228,7 @@ public class InteractiveView extends BaseView {
             showErrorMessage("El tema introducido no existe.");
             }
         } while (!allTopics.contains(selectedTopic));
-        
+
         System.out.println("\nPreguntas disponibles (" + selectedTopic + "):");
         List<Question> questions = controller.getQuestions();
         List<Question> filteredQuestions = new ArrayList<>();
@@ -270,7 +274,9 @@ public class InteractiveView extends BaseView {
                     modify(q);
                     break;
                 case 2:
-                    remove(q);
+                    if (remove(q)) {
+                        return;
+                    }
                     break;
                 case 0:
                     break;
@@ -321,7 +327,7 @@ public class InteractiveView extends BaseView {
                     boolean wasCorrect = q.getOptions().get(optionNumber - 1).isCorrect();
                     boolean correct = showYesOrNo("¿Es la correcta?");
                     if (correct != wasCorrect) {
-                        // Asegurarse de que hay una única correcta
+                        // Asegurarse de que hay una única opción correcta
                     }
 
                     if (showYesOrNo("¿Desea introducir un comentario justificativo?")) {
@@ -371,24 +377,24 @@ public class InteractiveView extends BaseView {
         } while (entry!=0);
     }
 
-    public void remove(Question q) {
+    public boolean remove(Question q) {
         if (showYesOrNo("¿Está seguro de que desea eliminar esta pregunta?")) {
             try {
                 controller.remove(q);
                 controller.removeAllTopics(q.getTopics());
                 showMessage("\nPregunta eliminada correctamente.");
+                return true;
             } catch (Exception e) {
                 showErrorMessage("\nError al eliminar la pregunta: " + e.getMessage());
             }
         }
+        return false;
     }
 
     @Override
     public void end() {
-        // Lógica de guardado
-        // añadir \n
-
-        showMessage("\nAplicación finalizada.");
+        controller.save();
+        showMessage("Aplicación finalizada.");
     }
 
 }

@@ -51,7 +51,7 @@ public class InteractiveView extends BaseView {
         int entry;
         do {
             System.out.println("\n        --- Menú  ---         ");
-            System.out.println("1) Gestionar preguntas (CRUD)");
+            System.out.println("1) Gestionar preguntas");
             System.out.println("2) Exportar/Importar preguntas");
             System.out.println("3) Modo Examen");
             /* Implementar gestión para QuestionCreator
@@ -63,6 +63,7 @@ public class InteractiveView extends BaseView {
             ...    
             */
             System.out.println("0) Guardar y salir");
+            System.out.flush();
             entry = showChoiceMessage(3);
 
             switch (entry) {
@@ -98,6 +99,7 @@ public class InteractiveView extends BaseView {
             System.out.println("1) Crear pregunta nueva");
             System.out.println("2) Ver preguntas existentes");
             System.out.println("0) Volver");
+            System.out.flush();
             entry = showChoiceMessage(2);
 
             switch (entry) {
@@ -173,26 +175,25 @@ public class InteractiveView extends BaseView {
             System.out.println("1) Listar por fecha de creación");
             System.out.println("2) Listar por tema");
             System.out.println("0) Volver");
+            System.out.flush();
             entry = showChoiceMessage(2);
 
             switch (entry) {
                 case 1:
                     listByDate();
-                    if (controller.getQuestions().size() == 0) {
-                        return;
-                    }
                     break;
                 case 2:
                     listByTopic();
-                    if (controller.getQuestions().size() == 0) {
-                        return;
-                    }
                     break;
                 case 0:
                     break;
                 default:
                     showErrorMessage("Opción no válida.");
                     break;
+            }
+            
+            if (controller.getQuestions().size() == 0) {
+                return;
             }
         } while (entry!=0);
     }
@@ -250,21 +251,22 @@ public class InteractiveView extends BaseView {
     }
     
     public void seeDetail(Question q) {
-        System.out.println("\n-> " + q.getStatement());
-        List<Option> options = q.getOptions();
-        for (int i = 0; i < options.size(); i++) {
-            Option o = options.get(i);
-            System.out.println("\n" + (i + 1) + ") " + o.getText() + (o.isCorrect() ? " (CORRECTA)" : ""));
-            if (o.getRationale() != null) {
-                System.out.println("(" + o.getRationale() + ")");
-            }
-        }
-        System.out.println("\nAutor: " + q.getAuthor());
-        System.out.println("Temas: " + String.join(", ", q.getTopics()));
-
         // Menú para modificar o eliminar
         int entry;
         do {
+            // Imprimir detalle en cada iteración para mostrar cambios
+            System.out.println("\n-> " + q.getStatement());
+            List<Option> options = q.getOptions();
+            for (int i = 0; i < options.size(); i++) {
+                Option o = options.get(i);
+                System.out.println("\n" + (i + 1) + ") " + o.getText() + (o.isCorrect() ? " (CORRECTA)" : ""));
+                if (o.getRationale() != null) {
+                    System.out.println("(" + o.getRationale() + ")");
+                }
+            }
+            System.out.println("\nAutor: " + q.getAuthor());
+            System.out.println("Temas: " + String.join(", ", q.getTopics()));
+            
             System.out.println("\n1) Modificar pregunta");
             System.out.println("2) Eliminar pregunta");
             System.out.println("0) Volver");
@@ -334,7 +336,6 @@ public class InteractiveView extends BaseView {
                     if (showYesOrNo("¿Desea introducir un comentario justificativo?")) {
                         String rationale = Esdia.readString("Comentario: ");
                         newOption = new Option(newText, rationale, correct);
-                        continue;
                     } else {
                         newOption = new Option(newText, correct);
                     }

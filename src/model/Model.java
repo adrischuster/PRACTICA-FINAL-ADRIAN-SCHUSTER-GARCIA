@@ -47,7 +47,7 @@ public class Model {
         for (Question impq : importedQuestions) {
             boolean copy = false;
             for (Question question : questions) {
-                if (question.getId() == impq.getId()) {
+                if (question.getId().equals(impq.getId())) {
                     copy = true;
                     break;
                 }

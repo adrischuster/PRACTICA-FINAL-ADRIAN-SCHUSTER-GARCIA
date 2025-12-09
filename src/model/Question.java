@@ -4,6 +4,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.List;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.io.Serializable;
 
 public class Question implements Serializable {
@@ -14,7 +16,7 @@ public class Question implements Serializable {
     private List<Option> options;
     private String author;
     private Set<String> topics;
-    private final long creationDate;
+    private final String creationDate;
 
     // Constructor
     public Question(String statement, List<Option> options, String author, Set<String> topics) {
@@ -23,8 +25,16 @@ public class Question implements Serializable {
         this.options = options;
         this.author = author;
         this.topics = topics;
-        this.creationDate = Instant.now().getEpochSecond();
+        this.creationDate = formattedDate(Instant.now().getEpochSecond());
     }
+
+    // Métodos
+    public String formattedDate(long epochSeconds) {
+        Instant instant = Instant.ofEpochSecond(epochSeconds);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").withZone(ZoneId.systemDefault());
+        return formatter.format(instant);
+    }
+
     // Getters y Setters
     public UUID getId() {
         return id;
@@ -58,7 +68,7 @@ public class Question implements Serializable {
         this.options = options;
     }
 
-    public long getCreationDate() {
+    public String getCreationDate() {
         return creationDate;
     }
 }

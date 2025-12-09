@@ -122,6 +122,7 @@ public class InteractiveView extends BaseView {
 
     private void create() {
         // Lógica de creación por E/S
+        // Crear factory method para Question?
         String statement = Esdia.readString("\nIntroduzca el enunciado de la pregunta: ");
         List<Option> options = new ArrayList<>();
         boolean hasCorrectOption = false;

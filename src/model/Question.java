@@ -3,8 +3,7 @@ package model;
 import java.util.Set;
 import java.util.UUID;
 import java.util.List;
-// mejor con epoch? mirar foro
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.io.Serializable;
 
 public class Question implements Serializable {
@@ -15,7 +14,7 @@ public class Question implements Serializable {
     private List<Option> options;
     private String author;
     private Set<String> topics;
-    private final ZonedDateTime creationDate;
+    private final long creationDate;
 
     // Constructor
     public Question(String statement, List<Option> options, String author, Set<String> topics) {
@@ -24,7 +23,7 @@ public class Question implements Serializable {
         this.options = options;
         this.author = author;
         this.topics = topics;
-        this.creationDate = ZonedDateTime.now();
+        this.creationDate = Instant.now().getEpochSecond();
     }
     // Getters y Setters
     public UUID getId() {
@@ -59,7 +58,7 @@ public class Question implements Serializable {
         this.options = options;
     }
 
-    public ZonedDateTime getCreationDate() {
+    public long getCreationDate() {
         return creationDate;
     }
 }

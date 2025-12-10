@@ -41,9 +41,17 @@ public class Model {
     }
 
     // CRUD
+    public boolean hasQuestions() {
+        return !questions.isEmpty();
+    }
+
     public void addQuestion(Question question) {
         questions.add(question);
         allTopics.addAll(question.getTopics());
+    }
+
+    public void removeQuestion(Question question) throws Exception {
+        questions.remove(question);
     }
 
     public List<Question> getFilteredQuestions(String topic) {
@@ -79,32 +87,12 @@ public class Model {
         }
     }
 
-    public void addAllTopics(String newTopic) {
+    public void addOnlyAllTopics(String newTopic) {
         allTopics.add(newTopic);
     }
 
-    public void removeAllTopics(String oldTopic) {
+    public void removeOnlyAllTopics(String oldTopic) {
         allTopics.remove(oldTopic);
-    }
-
-    public void updateAllTopics(String oldTopic, String newTopic) {
-        allTopics.add(newTopic);
-        boolean oldTopicInUse = false;
-        for (Question question : questions) {
-            Set<String> questionTopics = question.getTopics();
-            if (questionTopics.contains(oldTopic)) {
-                oldTopicInUse = true;
-                break;
-            }
-        }
-        if (!oldTopicInUse) {
-            // posibles excepciones?
-            allTopics.remove(oldTopic);
-        }
-    }
-
-    public void remove(Question question) throws Exception {
-        questions.remove(question);
     }
 
     public void removeAllTopics(Set<String> topics) {
@@ -120,6 +108,24 @@ public class Model {
             if (!topicInUse) {
                 allTopics.remove(topic);
             }
+        }
+    }
+
+    public void updateAllTopics(String oldTopic, String newTopic) {
+        allTopics.add(newTopic);
+
+        // llamar a removeAllTopics?
+        boolean oldTopicInUse = false;
+        for (Question question : questions) {
+            Set<String> questionTopics = question.getTopics();
+            if (questionTopics.contains(oldTopic)) {
+                oldTopicInUse = true;
+                break;
+            }
+        }
+        if (!oldTopicInUse) {
+            // posibles excepciones?
+            allTopics.remove(oldTopic);
         }
     }
 
@@ -147,13 +153,16 @@ public class Model {
 
     // EXAMEN
     public int getMaxQuestions(String topic) {
-        int count = 0;
-        for (Question q : questions) {
-            if (q.getTopics().contains(topic)) {
-                count++;
+        int total = questions.size();
+        if (!topic.equals(ALL_TOPICS)) {
+            total = 0;
+            for (Question q : questions) {
+                if (q.getTopics().contains(topic)) {
+                    total++;
+                }
             }
+            return count;
         }
-        return count;
     }
     
     public Exam configureExam(String topic, int numQuestions) {
@@ -170,7 +179,11 @@ public class Model {
         return new Exam(topic, numQuestions, examQuestions);
     }
 
-    public boolean studyAnswer(Exam exam, Question q, Integer answer) {
+    public void startExam(Exam exam) {
+        exam.startExam();
+    }
+
+    public FeedbackDTO studyAnswer(Exam exam, Question q, Integer answer) {
         if (answer != null) {
             int choice = answer.intValue();
             Option selectedOption = q.getOptions().get(choice - 1);

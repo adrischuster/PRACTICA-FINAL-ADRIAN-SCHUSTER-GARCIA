@@ -32,19 +32,30 @@ public class InteractiveView extends BaseView {
     @Override
     public void showQuestion(Question q) {
         System.out.println("\n-> " + q.getStatement());
-            List<Option> options = q.getOptions();
-            for (int i = 0; i < options.size(); i++) {
-                Option o = options.get(i);
-                System.out.println("\n" + (i + 1) + ") " + o.getText() + (o.isCorrect() ? " (CORRECTA)" : ""));
-                if (o.getRationale() != null) {
-                    System.out.println("(" + o.getRationale() + ")");
-                }
+        List<Option> options = q.getOptions();
+        for (int i = 0; i < options.size(); i++) {
+            Option o = options.get(i);
+            System.out.println("\n" + (i + 1) + ") " + o.getText() + (o.isCorrect() ? " (CORRECTA)" : ""));
+            if (o.getRationale() != null) {
+                System.out.println("(" + o.getRationale() + ")");
             }
-            System.out.println("\nAutor: " + q.getAuthor());
-            System.out.println("Temas: " + String.join(", ", q.getTopics()));
+        }
+        System.out.println("\nAutor: " + q.getAuthor());
+        System.out.println("Temas: " + String.join(", ", q.getTopics()));
     }
 
     @Override
+    public void askQuestion(Question q) {
+        System.out.println("\n-> " + q.getStatement());
+        List<Option> options = q.getOptions();
+        for (int i = 0; i < options.size(); i++) {
+            Option o = options.get(i);
+            System.out.println("\n" + (i + 1) + ") " + o.getText());
+        }
+    }
+
+    @Override
+    // poner excepcion de letra
     public int showChoiceMessage(int choiceSize) {
         int choice = Esdia.readInt("Seleccione una opción: ");
         while (choice < 1 || choice > choiceSize) {
@@ -94,7 +105,11 @@ public class InteractiveView extends BaseView {
                     menuBackup();
                     break;
                 case 3:
-                    controller.examMode();
+                    if (controller.hasQuestions()) {
+                        controller.examMode();
+                    } else {
+                        showErrorMessage("\nNo hay preguntas disponibles.");
+                    }
                     break;
                 case 4:
                     end();
@@ -123,10 +138,10 @@ public class InteractiveView extends BaseView {
                     create();
                     break;
                 case 2:
-                    if (controller.getQuestions().size() == 0) {
-                        showErrorMessage("\nNo hay preguntas disponibles.");
-                    } else {
+                    if (controller.hasQuestions()) {
                         menuListar();
+                    } else {
+                        showErrorMessage("\nNo hay preguntas disponibles.");
                     }
                     break;
                 case 3:
@@ -208,7 +223,7 @@ public class InteractiveView extends BaseView {
                     break;
             }
             
-            if (controller.getQuestions().size() == 0) {
+            if (!controller.hasQuestions()) {
                 return;
             }
         } while (entry!=3);

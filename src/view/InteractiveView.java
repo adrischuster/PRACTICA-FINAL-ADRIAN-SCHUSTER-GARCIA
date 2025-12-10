@@ -4,13 +4,16 @@ import com.coti.tools.Esdia;
 import model.Question;
 import java.util.ArrayList;
 import java.util.List;
-
-import model.Exam;
 import model.Option;
 import java.util.Set;
 import java.util.HashSet;
+import model.FeedbackDTO;
+import model.Exam;
 
 public class InteractiveView extends BaseView {
+    // Atributos
+    private static final String ALL_TOPICS = "TODOS";
+
     //Métodos
     // FUNCIONES AUXILIARES DE MENSAJE ÚNICO
     @Override
@@ -18,6 +21,7 @@ public class InteractiveView extends BaseView {
         System.out.println(msg);
     }
 
+    // ¿En cuáles hago @Override y en cuales pongo private??
     @Override
     public void showErrorMessage(String msg) {
         System.err.println(msg);
@@ -40,6 +44,7 @@ public class InteractiveView extends BaseView {
             System.out.println("Temas: " + String.join(", ", q.getTopics()));
     }
 
+    @Override
     public int showChoiceMessage(int choiceSize) {
         int choice = Esdia.readInt("Seleccione una opción: ");
         while (choice < 1 || choice > choiceSize) {
@@ -49,6 +54,7 @@ public class InteractiveView extends BaseView {
         return choice;
     }
 
+    @Override
     public boolean showYesOrNo(String msg) {
         System.out.print(msg + " (s/n): ");
         char response = Character.toUpperCase(Esdia.readString("").charAt(0));
@@ -60,6 +66,12 @@ public class InteractiveView extends BaseView {
         return response == 'S';
     }
 
+    @Override
+    public void askInput(String msg) {
+        System.out.print(msg);
+        Esdia.readString("");
+    }
+
     // INICIAR
     @Override
     public void init() {
@@ -69,6 +81,7 @@ public class InteractiveView extends BaseView {
             System.out.println("1) Gestionar preguntas");
             System.out.println("2) Exportar/Importar preguntas");
             System.out.println("3) Modo Examen");
+            // Cambiar a 0?
             System.out.println("4) Guardar y salir");
             System.out.flush();
             entry = showChoiceMessage(4);
@@ -98,7 +111,7 @@ public class InteractiveView extends BaseView {
     private void menuCRUD() {
         int entry;
         do {
-            System.out.println("\n  --- Gestión preguntas ---      ");
+            System.out.println("\n  --- Gestión preguntas ---    ");
             System.out.println("1) Crear pregunta nueva");
             System.out.println("2) Ver preguntas existentes");
             System.out.println("3) Volver");
@@ -201,33 +214,19 @@ public class InteractiveView extends BaseView {
         } while (entry!=3);
     }
 
-    public void listByDate() {
+    private void listByDate() {
         System.out.println("\nPreguntas disponibles (por fecha de creación): ");
         List<Question> questions = controller.getQuestions();
         for (int i = 0; i < questions.size(); i++) {
             Question q = questions.get(i);
             System.out.println((i + 1) + ") " + q.getStatement() + " (" + q.getCreationDate() + ")");
         }
-        
+
         controller.showDetail(questions);
     }
 
-    public void listByTopic() {
-        Set<String> allTopics = controller.getAllTopics();
-        System.out.println("\nTemas disponibles: ");
-        for (String topic : allTopics) {
-            System.out.println("-> " + topic);
-        }
-        
-        String selectedTopic;
-        boolean validTopic;
-        do {
-            selectedTopic = Esdia.readString("Introduzca el tema por el que desea filtrar: ").toUpperCase();
-            validTopic = allTopics.contains(selectedTopic);
-            if (!validTopic) {
-            showErrorMessage("El tema introducido no existe.");
-            }
-        } while (!validTopic);
+    private void listByTopic() {
+        String selectedTopic = selectTopic();
 
         System.out.println("\nPreguntas disponibles (" + selectedTopic + "):");
         List<Question> filteredQuestions = controller.getFilteredQuestions(selectedTopic);
@@ -240,6 +239,7 @@ public class InteractiveView extends BaseView {
         controller.showDetail(filteredQuestions);
     }
     
+    @Override
     public void showDetail(Question q) {
         int entry;
         do {
@@ -266,7 +266,7 @@ public class InteractiveView extends BaseView {
         } while (entry!=3);
     }
 
-    public void modify(Question q) {
+    private void modify(Question q) {
         int entry;
         do {
             System.out.println("\nModificar:");
@@ -356,7 +356,7 @@ public class InteractiveView extends BaseView {
         } while (entry!=5);
     }
 
-    public boolean remove(Question q) {
+    private boolean remove(Question q) {
         if (showYesOrNo("¿Está seguro de que desea eliminar esta pregunta?")) {
             try {
                 controller.remove(q);
@@ -371,7 +371,7 @@ public class InteractiveView extends BaseView {
     }
 
     // MENÚ BACKUP
-    public void menuBackup() {
+    private void menuBackup() {
         int entry;
         do {
             System.out.println("\n --- Exportar/Importar preguntas ---     ");
@@ -396,7 +396,7 @@ public class InteractiveView extends BaseView {
         } while (entry!=3);
     }
 
-    public void exportQuestions() {
+    private void exportQuestions() {
         try {
             String fileName = Esdia.readString("\nIntroduce el nombre del archivo en el 'home' de tu usuario (con extensión), donde se exportarán las preguntas: \n");
             controller.exportQuestions(fileName);
@@ -406,7 +406,7 @@ public class InteractiveView extends BaseView {
         }
     }
 
-    public void importQuestions() {
+    private void importQuestions() {
         try {
             String fileName = Esdia.readString("\nIntroduce el nombre del archivo en el 'home' de tu usuario (con extensión), desde donde se importarán las preguntas: \n");
             controller.importQuestions(fileName);
@@ -416,58 +416,14 @@ public class InteractiveView extends BaseView {
         }
     }
 
-    /*                                                                                */
-    /*                              ---- MODO EXAMEN ----                             */
-    /*                                                                                */
-    public void examMenu() {
-        if (!showYesOrNo("¿Desea realizar un examen con las preguntas actuales?")) {
-            return;
-        }
-        
+    // FUNCIONES AUXILIARES
+    @Override
+    public String selectTopic() {
         Set<String> allTopics = controller.getAllTopics();
         System.out.println("\nTemas disponibles: ");
         for (String topic : allTopics) {
             System.out.println("-> " + topic);
         }
-        System.out.println("-> TODOS");
-        
-        String selectedTopic;
-        boolean validTopic;
-        do {
-            selectedTopic = Esdia.readString("Introduzca el tema elegido: ").toUpperCase();
-            validTopic = allTopics.contains(selectedTopic) || selectedTopic.equals("TODOS");
-            if (!validTopic) {
-            showErrorMessage("El tema introducido no existe.");
-            }
-        } while (!validTopic);
-
-        int numQuestions;
-        int maxQuestions = controller.maxQuestionsByTopic(selectedTopic);
-        // implementar excepción?
-        do {
-            numQuestions = Esdia.readInt("Introduzca el número de preguntas: (1 - " + maxQuestions + "): ");
-            if (numQuestions <= 0 || numQuestions > maxQuestions) {
-                showErrorMessage("Número de preguntas no válido.");
-            }
-        } while (numQuestions <= 0 || numQuestions > maxQuestions);
-
-        Exam exam;
-        if (showYesOrNo("¿Comenzar el examen?")) {
-            try {
-                exam = new Exam(selectedTopic, numQuestions, examQuestions);
-                controller.startExam(exam);
-            } catch (Exception e) {
-                showErrorMessage("Error al iniciar el examen: " + e.getMessage());
-            }
-        }   
-    }
-
-    // FUNCIONES AUXILIARES
-    public String selectTopic(Set<String> allTopics) {
-        System.out.println("\nTemas disponibles: ");
-        for (String topic : allTopics) {
-            System.out.println("-> " + topic);
-        }
         
         String selectedTopic;
         boolean validTopic;
@@ -482,26 +438,18 @@ public class InteractiveView extends BaseView {
         return selectedTopic;
     }
 
-    public String selectExamTopic(Set<String> allTopics) {
-        System.out.println("\nTemas disponibles: ");
-        for (String topic : allTopics) {
-            System.out.println("-> " + topic);
-        }
-        System.out.println("-> TODOS");
-        
-        String selectedTopic;
-        boolean validTopic;
+    @Override
+    public String selectExamTopic() {
+        controller.addAllTopics(ALL_TOPICS);
+        String selectedTopic = selectTopic();
 
-        do {
-            selectedTopic = Esdia.readString("Introduzca el tema por el que desea filtrar: ").toUpperCase();
-            validTopic = allTopics.contains(selectedTopic);
-            if (!validTopic && !selectedTopic.equals("TODOS")) {
-            showErrorMessage("El tema introducido no existe.");
-            }
-        } while (!validTopic && !selectedTopic.equals("TODOS"));
+        // comprobar que no escriben TODOS como tema con ALL_TOPICS
+        // excepción si no existe "TODOS"?
+        controller.removeAllTopics(ALL_TOPICS);
         return selectedTopic;
     }
 
+    @Override
     public int askNumQuestions(int maxQuestions) {
         int numQuestions;
         do {
@@ -511,6 +459,42 @@ public class InteractiveView extends BaseView {
             }
         } while (numQuestions <= 0 || numQuestions > maxQuestions);
         return numQuestions;
+    }
+
+    @Override
+    public Integer answerQuestion() {
+        if (showYesOrNo("¿Responder?")) {
+            return showChoiceMessage(4);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void feedbackAnswer(FeedbackDTO feedback) {
+        if (feedback.isAnswered()) {
+            if (feedback.isCorrect()) {
+                showMessage("\nRespuesta correcta!");
+            } else {
+                showMessage("\nRespuesta incorrecta.");
+            }
+            if (feedback.getRationale() != null && !feedback.getRationale().isEmpty()) {
+                showMessage("(" + feedback.getRationale() + ")");
+            }
+        } else {
+            showMessage("\nPregunta no respondida.");
+        }
+    }
+
+    @Override
+    public void showResults(Exam exam) {
+        showMessage("\n  --- RESULTADOS ---");
+        showMessage("Nota: " + exam.getResult());
+        showMessage("Tema: " + exam.getTopic());
+        showMessage("Número de preguntas: " + exam.getNumQuestions());
+        showMessage("Respuestas correctas: " + exam.getCorrectAnswers());
+        showMessage("Respuestas incorrectas: " + exam.getIncorrectAnswers());
+        showMessage("Preguntas sin responder: " + exam.getUnanswered());
     }
 
     // CERRAR

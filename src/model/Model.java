@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
+import java.lang.Integer;
 
 public class Model {
     // Atributos
@@ -13,6 +14,7 @@ public class Model {
     // Comentar en informe esta decisión
     private List<Question> questions = new ArrayList<>();
     private Set<String> allTopics = new HashSet<>();
+    private static final String ALL_TOPICS = "TODOS";
 
     // Constructores
     public Model(IRepository repository, QuestionBackupIO backupHandler, List<QuestionCreator> questionCreators) {
@@ -77,6 +79,14 @@ public class Model {
         }
     }
 
+    public void addAllTopics(String newTopic) {
+        allTopics.add(newTopic);
+    }
+
+    public void removeAllTopics(String oldTopic) {
+        allTopics.remove(oldTopic);
+    }
+
     public void updateAllTopics(String oldTopic, String newTopic) {
         allTopics.add(newTopic);
         boolean oldTopicInUse = false;
@@ -88,6 +98,7 @@ public class Model {
             }
         }
         if (!oldTopicInUse) {
+            // posibles excepciones?
             allTopics.remove(oldTopic);
         }
     }
@@ -147,17 +158,36 @@ public class Model {
     
     public Exam configureExam(String topic, int numQuestions) {
         List<Question> examQuestions = new ArrayList<>();
-        for (Question q : questions) {
-            if (q.getTopics().contains(topic)) {
-                examQuestions.add(q);
-            }
+        if (!topic.equals(ALL_TOPICS)) {
+            for (Question q : questions) {
+                if (q.getTopics().contains(topic)) {
+                    examQuestions.add(q);
+                }
+            } 
+        } else {
+            examQuestions.addAll(questions);
         }
         return new Exam(topic, numQuestions, examQuestions);
     }
 
-    public Option addAnswer(Exam exam, Question question, int optionNumber) {
-        // return question.getOptions().get(optionNumber - 1);
-        
+    public boolean studyAnswer(Exam exam, Question q, Integer answer) {
+        if (answer != null) {
+            int choice = answer.intValue();
+            Option selectedOption = q.getOptions().get(choice - 1);
+            if (selectedOption.isCorrect()) {
+                exam.addCorrectAnswer();
+            } else {
+                exam.addIncorrectAnswer();
+            }
+
+            FeedbackDTO feedback = new FeedbackDTO(true, selectedOption.isCorrect(), selectedOption.getRationale());
+            return feedback;
+        } else {
+            exam.addUnanswered();
+
+            FeedbackDTO feedback = new FeedbackDTO();
+            return feedback;
+        }
     }
 
     // CERRAR

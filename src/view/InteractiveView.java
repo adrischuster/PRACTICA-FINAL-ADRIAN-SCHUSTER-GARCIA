@@ -374,7 +374,7 @@ public class InteractiveView extends BaseView {
     private boolean remove(Question q) {
         if (showYesOrNo("¿Está seguro de que desea eliminar esta pregunta?")) {
             try {
-                controller.remove(q);
+                controller.removeQuestion(q);
                 controller.removeAllTopics(q.getTopics());
                 showMessage("\nPregunta eliminada correctamente.");
                 return true;
@@ -397,7 +397,11 @@ public class InteractiveView extends BaseView {
 
             switch (entry) {
                 case 1:
-                    exportQuestions();
+                    if (controller.hasQuestions()) {
+                        exportQuestions();
+                    } else {
+                        showErrorMessage("\nNo hay preguntas disponibles.");
+                    }
                     break;
                 case 2:
                     importQuestions();
@@ -444,7 +448,7 @@ public class InteractiveView extends BaseView {
         boolean validTopic;
 
         do {
-            selectedTopic = Esdia.readString("Introduzca el tema por el que desea filtrar: ").toUpperCase();
+            selectedTopic = Esdia.readString("\nIntroduzca el tema deseado: ").toUpperCase();
             validTopic = allTopics.contains(selectedTopic);
             if (!validTopic) {
             showErrorMessage("El tema introducido no existe.");
@@ -455,12 +459,12 @@ public class InteractiveView extends BaseView {
 
     @Override
     public String selectExamTopic() {
-        controller.addAllTopics(ALL_TOPICS);
+        controller.addOnlyAllTopics(ALL_TOPICS);
         String selectedTopic = selectTopic();
 
         // comprobar que no escriben TODOS como tema con ALL_TOPICS
         // excepción si no existe "TODOS"?
-        controller.removeAllTopics(ALL_TOPICS);
+        controller.removeOnlyAllTopics(ALL_TOPICS);
         return selectedTopic;
     }
 
@@ -468,7 +472,7 @@ public class InteractiveView extends BaseView {
     public int askNumQuestions(int maxQuestions) {
         int numQuestions;
         do {
-            numQuestions = Esdia.readInt("Introduzca el número de preguntas: (1 - " + maxQuestions + "): ");
+            numQuestions = Esdia.readInt("\nIntroduzca el número de preguntas: (1 - " + maxQuestions + "): ");
             if (numQuestions <= 0 || numQuestions > maxQuestions) {
                 showErrorMessage("Número de preguntas no válido.");
             }
@@ -478,7 +482,7 @@ public class InteractiveView extends BaseView {
 
     @Override
     public Integer answerQuestion() {
-        if (showYesOrNo("¿Responder?")) {
+        if (showYesOrNo("\n¿Responder?")) {
             return showChoiceMessage(4);
         } else {
             return null;
@@ -493,7 +497,7 @@ public class InteractiveView extends BaseView {
             } else {
                 showMessage("\nRespuesta incorrecta.");
             }
-            if (feedback.getRationale() != null && !feedback.getRationale().isEmpty()) {
+            if (feedback.getRationale() != null) {
                 showMessage("(" + feedback.getRationale() + ")");
             }
         } else {
@@ -503,13 +507,14 @@ public class InteractiveView extends BaseView {
 
     @Override
     public void showResults(Exam exam) {
-        showMessage("\n  --- RESULTADOS ---");
-        showMessage("Nota: " + exam.getResult());
+        showMessage("\n\n    ---- RESULTADOS ----");
+        showMessage("\nNOTA : " + exam.getResult());
         showMessage("Tema: " + exam.getTopic());
-        showMessage("Número de preguntas: " + exam.getNumQuestions());
-        showMessage("Respuestas correctas: " + exam.getCorrectAnswers());
-        showMessage("Respuestas incorrectas: " + exam.getIncorrectAnswers());
-        showMessage("Preguntas sin responder: " + exam.getUnanswered());
+        showMessage("\nPreguntas: " + exam.getNumQuestions());
+        showMessage("Aciertos: " + exam.getCorrectAnswers());
+        showMessage("Fallos: " + exam.getIncorrectAnswers());
+        showMessage("No respondidas: " + exam.getUnanswered());
+        showMessage("\nTiempo: " + exam.durationToString());
     }
 
     // CERRAR
@@ -518,9 +523,9 @@ public class InteractiveView extends BaseView {
         try {
             controller.saveQuestions();
         } catch (Exception e) {
-            showErrorMessage("Error al guardar las preguntas: " + e.getMessage());
+            showErrorMessage("\nError al guardar las preguntas: " + e.getMessage());
         }
-        showMessage("Aplicación finalizada.");
+        showMessage("\nAplicación finalizada.");
     }
 
 }

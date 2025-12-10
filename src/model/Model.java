@@ -161,8 +161,9 @@ public class Model {
                     total++;
                 }
             }
-            return count;
         }
+
+        return total;
     }
     
     public Exam configureExam(String topic, int numQuestions) {
@@ -202,6 +203,14 @@ public class Model {
             return feedback;
         }
     }
+
+    public void evaluateExam(Exam exam) {
+        exam.endExam();
+        float result = ((exam.getCorrectAnswers() - (exam.getIncorrectAnswers()*0.33f)) * 10) / exam.getNumQuestions();
+        if (result > 0.0f) {
+            exam.setResult(result);
+        }
+    }  
 
     // CERRAR
     public void saveQuestions() throws Exception {

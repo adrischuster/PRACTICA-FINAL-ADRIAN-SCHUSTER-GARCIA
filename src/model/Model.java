@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.lang.Integer;
+import java.util.Collections;
 
 public class Model {
     // Atributos
@@ -167,16 +168,20 @@ public class Model {
     }
     
     public Exam configureExam(String topic, int numQuestions) {
-        List<Question> examQuestions = new ArrayList<>();
+        List<Question> topicQuestions = new ArrayList<>();
         if (!topic.equals(ALL_TOPICS)) {
             for (Question q : questions) {
                 if (q.getTopics().contains(topic)) {
-                    examQuestions.add(q);
+                    topicQuestions.add(q);
                 }
             } 
         } else {
-            examQuestions.addAll(questions);
+            topicQuestions.addAll(questions);
         }
+
+        Collections.shuffle(topicQuestions);
+        List<Question> examQuestions = topicQuestions.subList(0, numQuestions);
+
         return new Exam(topic, numQuestions, examQuestions);
     }
 

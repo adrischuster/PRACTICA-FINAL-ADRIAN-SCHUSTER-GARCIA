@@ -80,7 +80,7 @@ public class InteractiveView extends BaseView {
     @Override
     public void askInput(String msg) {
         System.out.print(msg);
-        Esdia.readString("");
+        Esdia.readString("\n");
     }
 
     // INICIAR
@@ -88,7 +88,7 @@ public class InteractiveView extends BaseView {
     public void init() {
         int entry;
         do {
-            System.out.println("\n        --- Menú  ---         ");
+            System.out.println("\n        --- INICIO  ---         ");
             System.out.println("1) Gestionar preguntas");
             System.out.println("2) Exportar/Importar preguntas");
             System.out.println("3) Modo Examen");
@@ -471,12 +471,11 @@ public class InteractiveView extends BaseView {
     @Override
     public int askNumQuestions(int maxQuestions) {
         int numQuestions;
-        do {
+        numQuestions = Esdia.readInt("\nIntroduzca el número de preguntas: (1 - " + maxQuestions + "): ");
+        while (numQuestions < 1 || numQuestions > maxQuestions) {
+            showErrorMessage("Número de preguntas no válido.");
             numQuestions = Esdia.readInt("\nIntroduzca el número de preguntas: (1 - " + maxQuestions + "): ");
-            if (numQuestions <= 0 || numQuestions > maxQuestions) {
-                showErrorMessage("Número de preguntas no válido.");
-            }
-        } while (numQuestions <= 0 || numQuestions > maxQuestions);
+        }
         return numQuestions;
     }
 
@@ -507,6 +506,7 @@ public class InteractiveView extends BaseView {
 
     @Override
     public void showResults(Exam exam) {
+        // añadir feedback segun resultado
         showMessage("\n\n    ---- RESULTADOS ----");
         showMessage("\nNOTA : " + exam.getResult());
         showMessage("Tema: " + exam.getTopic());
